@@ -1,0 +1,40 @@
+{
+    "name": "wasp",
+    "displayName": "Wasp",
+    "description": "Wasp for Visual Studio Code.",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.50.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/wasp-lang/vscode-wasp"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [
+            {
+                "id": "wasp",
+                "extensions": [
+                    ".wasp"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "wasp",
+                "scopeName": "source.wasp",
+                "path": "./syntaxes/wasp.tmLanguage.json"
+            }
+        ]
+    },
+    "devDependencies": {
+        "js-yaml": "^3.14.0"
+    },
+    "scripts": {
+        "build": "js-yaml syntaxes/wasp.tmLanguage.yaml > syntaxes/wasp.tmLanguage.json"
+    }
+}
