@@ -5,9 +5,9 @@
   "icon": "images/wasp-logo.png",
   "galleryBanner": {
     "color": "#2a2c2d",
-    "theme": "white"
+    "theme": "dark"
   },
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "wasp-lang",
   "engines": {
     "vscode": "^1.50.0"
@@ -46,7 +46,7 @@
   },
   "scripts": {
     "build": "js-yaml syntaxes/wasp.tmLanguage.yaml > syntaxes/wasp.tmLanguage.json",
-    "vscode.prepublish": "npm run build"
+    "vscode:prepublish": "npm run build"
   },
   "extensionDependencies": ["Prisma.prisma"]
 }
