@@ -39,6 +39,4 @@ If you are not logged in yet, you can log in with `vsce login wasp-lang`.
 
 To package the extension into a .vsix file, run `vsce package`.
 
-To package and then publish the extension, run `vsce publish`:
-- `vsce publish 1.2.3` to manually upgrade the version.
-- `vsce publish minor/major/patch` to automatically increment minor/major/patch version number.
+To package and then publish the extension, run `vsce publish`.
