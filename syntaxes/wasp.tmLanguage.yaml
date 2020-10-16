@@ -1,15 +1,18 @@
 ---
-# NOTE: Check README for instructins and advice.
+# NOTE: Check README for instructions and advice.
 # TODO: This grammar is a very simple, quick and dirty solution and it will not work in 100% cases.
-#   Due to how quickly is Wasp changing, it makes sense to keep it light and not 100% precise for now,
-#   and in the future we can look into more permanent options: either investing much more time
-#   into it and making it 100%, or dropping it completely and switching directly to semantic analysis
+#   Due to how quickly is Wasp changing, it makes sense to keep it light, not 100% precise for now,
+#   and fix it as we go, and in the future we can look into more permanent options: 
+#   either investing much more time into it and making it 100%,
+#   or dropping it completely and switching directly to semantic analysis
 #   via external service -> meaning that we feed the content of file to Wasp parser and it returns
 #   tokens. If that can be made to work fast enough, that could be attractive solution,
-#   to avoid maintaing this grammar.
+#   to avoid maintaing this grammar (such approach is called "semantic highlighting" in vs code docs).
+#   Ultimate solution would be to implement Wasp language server (LSP).
 #   
 "$schema": https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json
 name: wasp
+scopeName: source.wasp
 patterns:
   # Order here is important!
   - include: "#jsonClosure"
@@ -53,9 +56,9 @@ repository:
     patterns:
       - include: "source.prisma"
   wson:
-    name: meta.block.wasp # TODO: Better name.
+    name: meta.structure.dictionary.wasp
     begin: "{"
-    beginCaptures: { 0: { name: punctuation.separator.dictionary.begin } }
+    beginCaptures: { 0: { name: punctuation.separator.dictionary.begin.wasp } }
     end: "}"
     endCaptures: { 0: { name: punctuation.separator.dictionary.end } }
     patterns:
@@ -68,18 +71,19 @@ repository:
       # Check how they do it here: https://github.com/microsoft/vscode-JSON.tmLanguage/blob/master/JSON.tmLanguage#L179 .
       - match: "([a-zA-Z][0-9a-zA-Z]*)\\s*(:)"
         captures:
-          1: { name: support.type.property-name.wasp } # TODO: Better name?
-          2: { name: punctuation.separator.dictionary.key-value.wasp } # TODO: Better name?
+          1: { name: support.type.property-name.wasp }
+          2: { name: punctuation.separator.dictionary.key-value.wasp }
       - include: "#jsImportStmt"
       - include: "#strings"
-  # TODO: This is a very primitive implementation, we should improve it, but the full one is pretty complex.
-  #   e.g. right now it would break if there is legal 'from' between 'import' and 'from',
-  #   e.g. import { from } from "foo/bar"
+  # TODO: This is a very primitive implementation that works only for "happy" cases,
+  #   we should improve it, but the full one is pretty complex.
+  #   One example of where it could break right now is legal 'from' between 'import' and 'from',
+  #   e.g. import { from } from "foo/bar".
+  # There is an instance of full implementation here:
+  #   https://github.com/textmate/javascript.tmbundle/blob/master/Syntaxes/JavaScript.plist#L49
   jsImportStmt:
     begin: "\\bimport\\b"
     beginCaptures: { 0: { name: keyword.control.jsimport.wasp } }
     end: "\\bfrom\\b"
     endCaptures: { 0: { name: keyword.control.jsfrom.wasp } }
-    name: meta.other.wasp # TODO: name
-
-scopeName: source.wasp
+    name: meta.jsimport.wasp

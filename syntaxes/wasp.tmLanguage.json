@@ -1,6 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "wasp",
+  "scopeName": "source.wasp",
   "patterns": [
     {
       "include": "#jsonClosure"
@@ -66,11 +67,11 @@
       ]
     },
     "wson": {
-      "name": "meta.block.wasp",
+      "name": "meta.structure.dictionary.wasp",
       "begin": "{",
       "beginCaptures": {
         "0": {
-          "name": "punctuation.separator.dictionary.begin"
+          "name": "punctuation.separator.dictionary.begin.wasp"
         }
       },
       "end": "}",
@@ -115,8 +116,7 @@
           "name": "keyword.control.jsfrom.wasp"
         }
       },
-      "name": "meta.other.wasp"
+      "name": "meta.jsimport.wasp"
     }
-  },
-  "scopeName": "source.wasp"
+  }
 }
