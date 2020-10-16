@@ -27,7 +27,11 @@
             {
                 "language": "wasp",
                 "scopeName": "source.wasp",
-                "path": "./syntaxes/wasp.tmLanguage.json"
+                "path": "./syntaxes/wasp.tmLanguage.json",
+                "embeddedLanguages": {
+                    "meta.embedded.block.json": "json",
+                    "meta.embedded.block.prisma": "prisma"
+                }
             }
         ]
     },

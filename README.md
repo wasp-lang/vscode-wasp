@@ -4,6 +4,8 @@ This is the README for your extension "wasp". After writing up a brief descripti
 
 ## Developing (by Martin)
 - Main guide: https://code.visualstudio.com/api/language-extensions/syntax-highlight-guide
+- This is a great guide with an example we go through: https://gist.github.com/Aerijo/b8c82d647db783187804e86fa0a604a1 .
+- This is also a good list of tricks and traps: https://www.apeth.com/nonblog/stories/textmatebundle.html .
 - We write grammar in syntaxes/wasp.tmLanguage.yaml and then use `npm run build` to generate .json from it.
   .json is for now still in git, figure out if that makes sense or not.
 - To debug / try out:

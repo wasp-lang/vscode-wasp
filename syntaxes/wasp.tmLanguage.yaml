@@ -1,15 +1,27 @@
 ---
-
+# NOTE: Check README for instructins and advice.
+# TODO: This grammar is a very simple, quick and dirty solution and it will not work in 100% cases.
+#   Due to how quickly is Wasp changing, it makes sense to keep it light and not 100% precise for now,
+#   and in the future we can look into more permanent options: either investing much more time
+#   into it and making it 100%, or dropping it completely and switching directly to semantic analysis
+#   via external service -> meaning that we feed the content of file to Wasp parser and it returns
+#   tokens. If that can be made to work fast enough, that could be attractive solution,
+#   to avoid maintaing this grammar.
+#   
 "$schema": https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json
 name: wasp
 patterns:
-  - include: "#keywords"
+  # Order here is important!
+  - include: "#jsonClosure"
+  - include: "#prismaClosure"
+  - include: "#comment"
   - include: "#strings"
+  - include: "#wson"
+  - include: "#types"
 repository:
-  keywords:
-    patterns:
-      - name: keyword.control.wasp
-        match: "\\b(if|while|for|return)\\b"
+  comment:
+    name: comment.line.wasp
+    match: "//.*$"
   strings:
     name: string.quoted.double.wasp
     begin: "\""
@@ -17,4 +29,57 @@ repository:
     patterns:
       - name: constant.character.escape.wasp
         match: "\\\\."
+  types:
+    patterns:
+      - name: support.type.wasp
+        match: "\\b(app|route|page|entityPSL|query|action|dependencies)\\b"
+  jsonClosure:
+    name: meta.embedded.block.json
+    begin: "{=json"
+    end: "json=}"
+    patterns:
+      - include: "source.json"
+  # TODO: While it does higlight syntax to some part as prisma code,
+  #   it does not do it completely, just some parts of it.
+  #   Compare with schema.prisma file to see the difference.
+  #   That is probably because in Wasp, {=psl psl=} block is missing
+  #   'model Task {' and final '}', which prisma grammar probably expects.
+  #   Figure out what to do about this - not sure we can do much without
+  #   modifying Wasp syntax or parsing this ourselves.
+  prismaClosure:
+    name: meta.embedded.block.prisma
+    begin: "{=psl"
+    end: "psl=}"
+    patterns:
+      - include: "source.prisma"
+  wson:
+    name: meta.block.wasp # TODO: Better name.
+    begin: "{"
+    beginCaptures: { 0: { name: punctuation.separator.dictionary.begin } }
+    end: "}"
+    endCaptures: { 0: { name: punctuation.separator.dictionary.end } }
+    patterns:
+      - include: "#comment"
+      # wson key
+      # TODO: This is now very primitive approach that works in limited situations..
+      # It should be upgraded so that it uses this 'match' as 'begin', and then
+      # looks for , or } as 'end', and then also parses stuff in between recursively (via 'patterns'),
+      # meaning it could be another wson, or a primitive value or array or smth like that.
+      # Check how they do it here: https://github.com/microsoft/vscode-JSON.tmLanguage/blob/master/JSON.tmLanguage#L179 .
+      - match: "([a-zA-Z][0-9a-zA-Z]*)\\s*(:)"
+        captures:
+          1: { name: support.type.property-name.wasp } # TODO: Better name?
+          2: { name: punctuation.separator.dictionary.key-value.wasp } # TODO: Better name?
+      - include: "#jsImportStmt"
+      - include: "#strings"
+  # TODO: This is a very primitive implementation, we should improve it, but the full one is pretty complex.
+  #   e.g. right now it would break if there is legal 'from' between 'import' and 'from',
+  #   e.g. import { from } from "foo/bar"
+  jsImportStmt:
+    begin: "\\bimport\\b"
+    beginCaptures: { 0: { name: keyword.control.jsimport.wasp } }
+    end: "\\bfrom\\b"
+    endCaptures: { 0: { name: keyword.control.jsfrom.wasp } }
+    name: meta.other.wasp # TODO: name
+
 scopeName: source.wasp
