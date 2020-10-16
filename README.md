@@ -1,77 +1,42 @@
-# wasp README
+# VS Code Wasp language extension
 
-This is the README for your extension "wasp". After writing up a brief description, we recommend including the following sections.
-
-## Developing (by Martin)
-- Main guide: https://code.visualstudio.com/api/language-extensions/syntax-highlight-guide
-- This is a great guide with an example we go through: https://gist.github.com/Aerijo/b8c82d647db783187804e86fa0a604a1 .
-- This is also a good list of tricks and traps: https://www.apeth.com/nonblog/stories/textmatebundle.html .
-- We write grammar in syntaxes/wasp.tmLanguage.yaml and then use `npm run build` to generate .json from it.
-  .json is for now still in git, figure out if that makes sense or not.
-- To debug / try out:
-  - Open this project as directory via vscode and press "F5".
-    This will open new vscode window which has the extension loaded and we can try it out there.
-    Open some .wasp file in that window to test how extension works.
-  - In this secondary window, we can run 'Developer: Inspect Editor Tokens and Scopes' from Command Palette and it will show us how is file tokenized!
+This is a Visual Studio Code language extension for [wasp](https://wasp-lang.dev) language!
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+For now, only feature is syntax highlighting of .wasp files.
 
-For example if there is an image subfolder under your extension project workspace:
+## Development (for contributors)
+### Resources
+- Official vscode doc: https://code.visualstudio.com/api/language-extensions/syntax-highlight-guide .
+- Great tutorial with practical examples: https://gist.github.com/Aerijo/b8c82d647db783187804e86fa0a604a1 .
+- Somewhat more theoretical guide of TextMate grammar: https://www.apeth.com/nonblog/stories/textmatebundle.html .
 
-\!\[feature X\]\(images/feature-x.png\)
+### Workflow
+Grammar is defined in `syntaxes/wasp.tmLanguage.yaml`, and you do most of the changes there.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+VSCode needs .json, not .yaml -> use `npm run build` to generate .json from .yaml.
 
-## Requirements
+`package.json` is also important -> besides general settings, we also define embedded languages and extension dependencies there.
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+1. Open root dir of this project with VSCode.
+2. Run F5 -> this will start another, "testing" window with extension loaded and working.
+3. In "testing" window: open some .wasp file to see how extension works.
+4. Modify extension source with new changes (most likely `syntaxes/wasp.tmLanguage.yaml`)
+   and run `npm run build` to regenerate .json.
+5. In "testing" window: run "Reload Window" command to load updated version of extension.
+6. In "testing" window: while inspecting .wasp file to see how extension works, you can
+   run "Developer: Inspect Editor Tokens and Scopes" command to get a popup for each token showing
+   how it got clasified/scoped by extension -> this is great for figuring out if extension does what it should do,
+   which is at the end, applying correct scopes.
+7. Repeat step 4.
 
-## Extension Settings
+### Publish
+Make sure you have `vsce` installed: `npm -g install vsce`.
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+To package the extension into a .vsix file, run `vsce package`.
 
-For example:
+To package and then publish the extension, run `vsce publish`.
 
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+To do all these operations, you need to be logged in with the publisher.
+If you are not logged in yet, you can log in with `vsce login wasp-lang`.
