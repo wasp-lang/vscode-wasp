@@ -2,7 +2,12 @@
   "name": "wasp",
   "displayName": "Wasp",
   "description": "Wasp language extension for Visual Studio Code.",
-  "version": "0.0.1",
+  "icon": "images/wasp-logo.png",
+  "galleryBanner": {
+    "color": "#2a2c2d",
+    "theme": "white"
+  },
+  "version": "0.0.2",
   "publisher": "wasp-lang",
   "engines": {
     "vscode": "^1.50.0"
