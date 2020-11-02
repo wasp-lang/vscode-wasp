@@ -7,10 +7,10 @@
     "color": "#2a2c2d",
     "theme": "dark"
   },
-  "version": "0.0.4",
+  "version": "0.0.5",
   "publisher": "wasp-lang",
   "engines": {
-    "vscode": "^1.50.0"
+    "vscode": "^1.42.0"
   },
   "repository": {
     "type": "git",
