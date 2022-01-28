@@ -26,7 +26,11 @@
         "extensions": [
           ".wasp"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "dark": "./images/wasp-logo.png",
+          "light": "./images/wasp-logo.png"
+        }
       }
     ],
     "grammars": [
