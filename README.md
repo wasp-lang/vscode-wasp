@@ -4,7 +4,22 @@ This is a Visual Studio Code language extension for [wasp](https://wasp-lang.dev
 
 ## Features
 
-For now, only feature is syntax highlighting of .wasp files.
+Features:
+- Syntax highlighting for `.wasp` files
+- Snippets for `.wasp` files
+- Wasp language server
+
+### Using the Wasp language server
+
+`waspls` (the Wasp language server) is very early in development and is not
+bundled with this extension or available for binary download. To set it up now:
+
+1. Clone https://github.com/wasp-lang/wasp
+2. Navigate to `waspls` directory
+3. Run `cabal build` (requires Haskell toolchain to be installed)
+4. Open vscode with this extension enabled, find the `Vscode-wasp: Executable`
+   setting, and enter the path to the binary created in step 3.
+5. Reload vscode.
 
 ## Development (for contributors)
 ### Resources
@@ -15,7 +30,7 @@ For now, only feature is syntax highlighting of .wasp files.
 ### Workflow
 Grammar is defined in `syntaxes/wasp.tmLanguage.yaml`, and you do most of the changes there.
 
-VSCode needs .json, not .yaml -> use `npm run build` to generate .json from .yaml.
+VSCode needs .json, not .yaml -> use `npm run compile-yaml` to generate .json from .yaml.
 
 `package.json` is also important -> besides general settings, we also define embedded languages and extension dependencies there.
 
@@ -30,6 +45,13 @@ VSCode needs .json, not .yaml -> use `npm run build` to generate .json from .yam
    how it got clasified/scoped by extension -> this is great for figuring out if extension does what it should do,
    which is at the end, applying correct scopes.
 7. Repeat step 4.
+
+For features implemented in typescript, the entry point for the project is `src/extension.ts`.
+Use `npm run compile-ts` to compile the typescript code, or `npm run watch` to 
+automatically recompile on changes.
+
+Use `npm run compile` to compile typescript code and convert the TextMate grammar
+to JSON.
 
 ### Publish
 Make sure you have `vsce` installed: `npm -g install vsce`.
