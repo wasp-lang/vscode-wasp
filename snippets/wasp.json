@@ -1,0 +1,41 @@
+{
+  "Page": {
+    "prefix": "page",
+    "description": "Create a new page and matching",
+    "body": [
+      "route ${1:Name}Route { path: \"/${2:path}\", to: ${1:Name} }",
+      "page ${1:Name} {",
+      "\tcomponent: import ${1:name} from \"@ext/${3:component}\"",
+      "}"
+    ]
+  },
+
+  "Query": {
+    "prefix": "query",
+    "body": [
+      "query ${1:name} {",
+      "\tfn: import ${2:function} from \"@ext/${3:sourceFile}\",",
+      "\tentities: [${4:Entities}]",
+      "}"
+    ]
+  },
+
+  "Action": {
+    "prefix": "action",
+    "body": [
+      "action ${1:name} {",
+      "\tfn: import ${2:function} from \"@ext/${3:sourceFile}\",",
+      "\tentities: [${4:Entities}]",
+      "}"
+    ]
+  },
+
+  "Entity": {
+    "prefix": "entity",
+    "body": [
+      "entity ${1:Name} {=psl",
+      "\t${2:schema}",
+      "psl=}"
+    ]
+  }
+}

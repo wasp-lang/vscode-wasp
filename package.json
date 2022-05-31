@@ -33,6 +33,12 @@
         }
       }
     ],
+    "snippets": [
+      {
+        "language": "wasp",
+        "path": "./snippets/wasp.json"
+      }
+    ],
     "grammars": [
       {
         "language": "wasp",
