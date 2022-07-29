@@ -57,7 +57,10 @@ export async function activate(context: ExtensionContext) {
     }
   }
 
-  const logFile = config.server.logFile;
+  // TODO: send these settings to waspls so it can update its logging output if
+  // these are changed while the language server is running
+  const useOutputPanel = config.server.useOutputPanelForLogging;
+  const logFile = useOutputPanel ? "[OUTPUT]" : config.server.logFile;
   const logFileOpt = logFile.trim() === '' ? [] : ['--log=' + logFile];
 
   let runArgs = [...logFileOpt];

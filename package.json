@@ -59,16 +59,16 @@
       "type": "object",
       "title": "Wasp",
       "properties": {
-        "wasp.server.maxNumberOfProblems": {
-          "scope": "resource",
-          "type": "number",
-          "default": 100,
-          "description": "Controls the maximum number of problems produced by the server."
-        },
         "wasp.server.executable": {
           "scope": "resource",
           "type": "string",
-          "description": "Path to wasp language server executable. Uses bundled waspls if not set."
+          "description": "Path to wasp language server executable. Tries to use waspls on PATH if not set."
+        },
+        "wasp.server.useOutputPanelForLogging": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Send logs from the wasp language server to the output panel. If enabled, the log file setting will be ignored"
         },
         "wasp.server.logFile": {
           "scope": "resource",
