@@ -19,9 +19,11 @@ export async function activate(context: ExtensionContext) {
 
   const config = workspace.getConfiguration('wasp');
 
+  // Compute path to `waspls` executable, based on settings
   const userDefinedExecutablePath = config.server.executable;
   let executablePath = userDefinedExecutablePath === '' ? 'waspls' : userDefinedExecutablePath;
 
+  // Substitute vscode path variables into configuration
   console.log(`Trying to find the server executable in ${executablePath}`);
   executablePath = executablePath
     .replace('${HOME}', os.homedir)
@@ -32,9 +34,9 @@ export async function activate(context: ExtensionContext) {
     return;
   }
 
-  let folders = workspace.workspaceFolders
+  let folders = workspace.workspaceFolders;
   if (folders) {
-    let folder = folders[0]
+    let folder = folders[0];
     if (folder) {
       executablePath = executablePath.replace('${workspaceFolder}', folder.uri.path).replace('${workspaceRoot}', folder.uri.path);
     }
@@ -42,6 +44,7 @@ export async function activate(context: ExtensionContext) {
 
   console.log(`Location after path variables subsitution: ${executablePath}`);
 
+  // Check if the path points to a valid waspls executable
   const executableStatus = await checkExecutable(executablePath);
 
   if (executableStatus !== 'available') {
@@ -57,12 +60,14 @@ export async function activate(context: ExtensionContext) {
     }
   }
 
+
   // TODO: send these settings to waspls so it can update its logging output if
   // these are changed while the language server is running
   const useOutputPanel = config.server.useOutputPanelForLogging;
   const logFile = useOutputPanel ? "[OUTPUT]" : config.server.logFile;
   const logFileOpt = logFile.trim() === '' ? [] : ['--log=' + logFile];
 
+  // Configure vscode-languageclient
   let runArgs = [...logFileOpt];
   let debugArgs = [...logFileOpt];
 
@@ -97,6 +102,7 @@ export async function activate(context: ExtensionContext) {
   client.start();
   outputChannel.appendLine('..Wasp LSP Server has been started..');
 
+  // Register command to restart waspls
   context.subscriptions.push(commands.registerCommand('vscode-wasp.restartLanguageServer', async () => {
     if (client) {
       try {
@@ -116,6 +122,12 @@ export function deactivate() {
   }
 }
 
+// Runs the executable in `version` mode and checks that it:
+// - Exits successfuly
+// - Exits within 1 second
+//
+// If it fails either of these checks, a status is returned to show that the
+// executable path is not valid.
 async function checkExecutable(executablePath: string): Promise<Status> {
   const execPromise = promisify(execFile)
     (executablePath, ['version'], { timeout: 2000, windowsHide: true })
@@ -131,6 +143,7 @@ async function checkExecutable(executablePath: string): Promise<Status> {
   return Promise.race([execPromise, timeoutPromise]);
 }
 
+// Executable status types
 enum Status {
   Available = 'available',
   Missing = 'missing',
