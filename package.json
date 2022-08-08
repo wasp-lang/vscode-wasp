@@ -68,7 +68,7 @@
           "scope": "resource",
           "type": "boolean",
           "default": true,
-          "description": "Send logs from the wasp language server to the output panel. If enabled, the log file setting will be ignored"
+          "description": "Send logs from the wasp language server to the output panel. If enabled, the log file setting will be ignored."
         },
         "wasp.server.logFile": {
           "scope": "resource",
