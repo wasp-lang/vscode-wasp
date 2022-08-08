@@ -19,39 +19,16 @@ export async function activate(context: ExtensionContext) {
 
   const config = workspace.getConfiguration('wasp');
 
-  // Compute path to `waspls` executable, based on settings
-  const userDefinedExecutablePath = config.server.executable;
-  let executablePath = userDefinedExecutablePath === '' ? 'waspls' : userDefinedExecutablePath;
-
-  // Substitute vscode path variables into configuration
-  console.log(`Trying to find the server executable in ${executablePath}`);
-  executablePath = executablePath
-    .replace('${HOME}', os.homedir)
-    .replace('${home}', os.homedir)
-    .replace(/^~/, os.homedir);
-  if (executablePath === '') {
-    window.showErrorMessage(`wasp executable path ${executablePath} is empty, check your configuration`);
-    return;
-  }
-
-  let folders = workspace.workspaceFolders;
-  if (folders) {
-    let folder = folders[0];
-    if (folder) {
-      executablePath = executablePath.replace('${workspaceFolder}', folder.uri.path).replace('${workspaceRoot}', folder.uri.path);
-    }
-  }
-
-  console.log(`Location after path variables subsitution: ${executablePath}`);
+  const { executablePath, usePathWaspls } = resolveExecutablePath(config.server.executable);
 
   // Check if the path points to a valid waspls executable
   const executableStatus = await checkExecutable(executablePath);
 
-  if (executableStatus !== 'available') {
-    if (executableStatus === 'timedout') {
+  if (executableStatus !== Status.Available) {
+    if (executableStatus === Status.Timedout) {
       window.showInformationMessage(`The wasp server process has timed out.`);
     } else {
-      if (userDefinedExecutablePath === '') {
+      if (usePathWaspls) {
         window.showErrorMessage('No `waspls` executable is available in the VSCode PATH.');
         return;
       } else {
@@ -59,7 +36,6 @@ export async function activate(context: ExtensionContext) {
       }
     }
   }
-
 
   // TODO: send these settings to waspls so it can update its logging output if
   // these are changed while the language server is running
@@ -120,6 +96,45 @@ export function deactivate() {
   if (client) {
     client.stop();
   }
+}
+
+function resolveExecutablePath(userDefinedExecutablePath: string): { executablePath: string, usePathWaspls: boolean } {
+  if (!userDefinedExecutablePath) {
+    return {
+      executablePath: 'waspls',
+      usePathWaspls: true,
+    };
+  }
+
+  let executablePath = userDefinedExecutablePath;
+
+  // Substitute vscode path variables into configuration
+  console.log(`Trying to find the server executable in ${executablePath}`);
+  executablePath = executablePath
+    .replace('${HOME}', os.homedir)
+    .replace('${home}', os.homedir)
+    .replace(/^~/, os.homedir);
+  if (executablePath === '') {
+    window.showErrorMessage(`wasp executable path ${executablePath} is empty, check your configuration`);
+    return;
+  }
+
+  let folders = workspace.workspaceFolders;
+  if (folders) {
+    let folder = folders[0];
+    if (folder) {
+      executablePath = executablePath
+        .replace('${workspaceFolder}', folder.uri.path)
+        .replace('${workspaceRoot}', folder.uri.path);
+    }
+  }
+
+  console.log(`Location after path variables subsitution: ${executablePath}`);
+
+  return {
+    executablePath,
+    usePathWaspls: false,
+  };
 }
 
 // Runs the executable in `version` mode and checks that it:

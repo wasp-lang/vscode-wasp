@@ -1,7 +1,7 @@
 {
   "Page": {
     "prefix": "page",
-    "description": "Create a new page and matching",
+    "description": "Create a new page and route",
     "body": [
       "route ${1:Name}Route { path: \"/${2:path}\", to: ${1:Name} }",
       "page ${1:Name} {",
