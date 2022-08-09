@@ -17,6 +17,7 @@ const outputChannel = window.createOutputChannel('Wasp Language Server');
 export async function activate(context: ExtensionContext) {
   console.log('..Extension "vscode-wasp" is now active..');
 
+  // Configuration name and properties are set in package.json
   const config = workspace.getConfiguration('wasp');
 
   const { executablePath, usePathWaspls } = resolveExecutablePath(config.server.executable);
@@ -108,7 +109,9 @@ function resolveExecutablePath(userDefinedExecutablePath: string): { executableP
 
   let executablePath = userDefinedExecutablePath;
 
-  // Substitute vscode path variables into configuration
+  // Interpolate in values for common vscode path variables
+
+  // Path variable for home directory
   console.log(`Trying to find the server executable in ${executablePath}`);
   executablePath = executablePath
     .replace('${HOME}', os.homedir)
@@ -119,6 +122,7 @@ function resolveExecutablePath(userDefinedExecutablePath: string): { executableP
     return;
   }
 
+  // Path variable for workspace folder
   let folders = workspace.workspaceFolders;
   if (folders) {
     let folder = folders[0];
