@@ -6,12 +6,20 @@
 	"version": "0.2.0",
     "configurations": [
         {
-            "name": "Extension",
             "type": "extensionHost",
             "request": "launch",
+            "name": "Launch Client",
+            "runtimeExecutable": "${execPath}",
             "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}"
-            ]
+                "--extensionDevelopmentPath=${workspaceRoot}"
+            ],
+            "outFiles": [
+                "${workspaceRoot}/out/**/*.js"
+            ],
+            "preLaunchTask": {
+                "type": "npm",
+                "script": "watch"
+            }
         }
     ]
 }

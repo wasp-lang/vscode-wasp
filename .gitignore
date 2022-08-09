@@ -1,3 +1,4 @@
 node_modules
 *.vsix
 syntaxes/wasp.tmLanguage.json
+out
