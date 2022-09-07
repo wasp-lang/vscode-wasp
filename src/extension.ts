@@ -20,17 +20,17 @@ export async function activate(context: ExtensionContext) {
   // Configuration name and properties are set in package.json
   const config = workspace.getConfiguration('wasp');
 
-  const { executablePath, usePathWaspls } = resolveExecutablePath(config.server.executable);
+  const { executablePath, usePathWasp } = resolveExecutablePath(config.server.executable);
 
-  // Check if the path points to a valid waspls executable
+  // Check if the path points to a valid wasp executable
   const executableStatus = await checkExecutable(executablePath);
 
   if (executableStatus !== Status.Available) {
     if (executableStatus === Status.Timedout) {
       window.showInformationMessage(`The wasp server process has timed out.`);
     } else {
-      if (usePathWaspls) {
-        window.showErrorMessage('No `waspls` executable is available in the VSCode PATH.');
+      if (usePathWasp) {
+        window.showErrorMessage('No `wasp` executable is available in the VSCode PATH.');
         return;
       } else {
         window.showInformationMessage(`The user defined executable path couldn't be run: [${executablePath}].`);
@@ -38,15 +38,15 @@ export async function activate(context: ExtensionContext) {
     }
   }
 
-  // TODO: send these settings to waspls so it can update its logging output if
+  // TODO: send these settings to wasp so it can update its logging output if
   // these are changed while the language server is running
   const useOutputPanel = config.server.useOutputPanelForLogging;
   const logFile = useOutputPanel ? "[OUTPUT]" : config.server.logFile;
   const logFileOpt = logFile.trim() === '' ? [] : ['--log=' + logFile];
 
   // Configure vscode-languageclient
-  let runArgs = [...logFileOpt];
-  let debugArgs = [...logFileOpt];
+  let runArgs = ['waspls', ...logFileOpt];
+  let debugArgs = ['waspls', ...logFileOpt];
 
   let serverOptions: ServerOptions = {
     run: {
@@ -79,7 +79,7 @@ export async function activate(context: ExtensionContext) {
   client.start();
   outputChannel.appendLine('..Wasp LSP Server has been started..');
 
-  // Register command to restart waspls
+  // Register command to restart wasp
   context.subscriptions.push(commands.registerCommand('vscode-wasp.restartLanguageServer', async () => {
     if (client) {
       try {
@@ -99,11 +99,11 @@ export function deactivate() {
   }
 }
 
-function resolveExecutablePath(userDefinedExecutablePath: string): { executablePath: string, usePathWaspls: boolean } {
+function resolveExecutablePath(userDefinedExecutablePath: string): { executablePath: string, usePathWasp: boolean } {
   if (!userDefinedExecutablePath) {
     return {
-      executablePath: 'waspls',
-      usePathWaspls: true,
+      executablePath: 'wasp',
+      usePathWasp: true,
     };
   }
 
@@ -137,7 +137,7 @@ function resolveExecutablePath(userDefinedExecutablePath: string): { executableP
 
   return {
     executablePath,
-    usePathWaspls: false,
+    usePathWasp: false,
   };
 }
 
