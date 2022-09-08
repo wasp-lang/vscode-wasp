@@ -23,17 +23,21 @@ If not, [check installation instruction here](https://wasp-lang.dev/docs).
 - Great tutorial with practical examples: https://gist.github.com/Aerijo/b8c82d647db783187804e86fa0a604a1 .
 - Somewhat more theoretical guide of TextMate grammar: https://www.apeth.com/nonblog/stories/textmatebundle.html .
 
+### Setup
+Run `npm install`.
+
 ### Workflow
 Grammar (used for syntax highlighting) is defined in `syntaxes/wasp.tmLanguage.yaml`, and you do most of the changes there.
 VSCode needs .json, not .yaml -> use `npm run compile-yaml` to generate .json from .yaml.
 
 `package.json` is also important -> besides general settings, we also define embedded languages and extension dependencies there.
 
+0. Compile your latest code with `npm run compile`.
 1. Open root dir of this project with VSCode.
 2. Run F5 -> this will start another, "testing" window with extension loaded and working.
 3. In "testing" window: open some .wasp file to see how extension works.
 4. Modify extension source with new changes (most likely `syntaxes/wasp.tmLanguage.yaml`)
-   and run `npm run build` to regenerate .json.
+   and run `npm run compile` to regenerate files.
 5. In "testing" window: run "Reload Window" command to load updated version of extension.
 6. In "testing" window: while inspecting .wasp file to see how extension works, you can
    run "Developer: Inspect Editor Tokens and Scopes" command to get a popup for each token showing
