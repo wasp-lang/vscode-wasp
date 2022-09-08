@@ -7,7 +7,7 @@
     "color": "#2a2c2d",
     "theme": "dark"
   },
-  "version": "0.0.6",
+  "version": "0.1.0",
   "publisher": "wasp-lang",
   "engines": {
     "vscode": "^1.42.0"

@@ -20,16 +20,16 @@ export async function activate(context: ExtensionContext) {
   // Configuration name and properties are set in package.json
   const config = workspace.getConfiguration('wasp');
 
-  const { executablePath, usePathWasp } = resolveExecutablePath(config.server.executable);
+  const executablePath = resolveWaspExecutablePath(config.server.executable);
 
   // Check if the path points to a valid wasp executable
-  const executableStatus = await checkExecutable(executablePath);
+  const executableStatus = await checkWaspExecutable(executablePath);
 
   if (executableStatus !== Status.Available) {
     if (executableStatus === Status.Timedout) {
       window.showInformationMessage(`The wasp server process has timed out.`);
     } else {
-      if (usePathWasp) {
+      if (executablePath === 'wasp') {
         window.showErrorMessage('No `wasp` executable is available in the VSCode PATH.');
         return;
       } else {
@@ -38,7 +38,7 @@ export async function activate(context: ExtensionContext) {
     }
   }
 
-  // TODO: send these settings to wasp so it can update its logging output if
+  // TODO: send these settings to wasp language server so it can update its logging output if
   // these are changed while the language server is running
   const useOutputPanel = config.server.useOutputPanelForLogging;
   const logFile = useOutputPanel ? "[OUTPUT]" : config.server.logFile;
@@ -63,9 +63,7 @@ export async function activate(context: ExtensionContext) {
 
   let clientOptions: LanguageClientOptions = {
     documentSelector: [{ scheme: 'file', language: 'wasp' }],
-    initializationOptions: {
-      'vscode-wasp': workspace.getConfiguration('vscode-wasp'),
-    },
+    initializationOptions: { 'vscode-wasp': workspace.getConfiguration('vscode-wasp') },
     outputChannel: outputChannel
   };
 
@@ -79,7 +77,7 @@ export async function activate(context: ExtensionContext) {
   client.start();
   outputChannel.appendLine('..Wasp LSP Server has been started..');
 
-  // Register command to restart wasp
+  // Register command to restart wasp language server.
   context.subscriptions.push(commands.registerCommand('vscode-wasp.restartLanguageServer', async () => {
     if (client) {
       try {
@@ -99,55 +97,49 @@ export function deactivate() {
   }
 }
 
-function resolveExecutablePath(userDefinedExecutablePath: string): { executablePath: string, usePathWasp: boolean } {
-  if (!userDefinedExecutablePath) {
-    return {
-      executablePath: 'wasp',
-      usePathWasp: true,
-    };
-  }
-
-  let executablePath = userDefinedExecutablePath;
-
-  // Interpolate in values for common vscode path variables
-
-  // Path variable for home directory
-  console.log(`Trying to find the server executable in ${executablePath}`);
-  executablePath = executablePath
-    .replace('${HOME}', os.homedir)
-    .replace('${home}', os.homedir)
-    .replace(/^~/, os.homedir);
-  if (executablePath === '') {
-    window.showErrorMessage(`wasp executable path ${executablePath} is empty, check your configuration`);
-    return;
-  }
-
-  // Path variable for workspace folder
-  let folders = workspace.workspaceFolders;
-  if (folders) {
-    let folder = folders[0];
-    if (folder) {
-      executablePath = executablePath
-        .replace('${workspaceFolder}', folder.uri.path)
-        .replace('${workspaceRoot}', folder.uri.path);
-    }
-  }
-
-  console.log(`Location after path variables subsitution: ${executablePath}`);
-
-  return {
-    executablePath,
-    usePathWasp: false,
-  };
+// For a given user defined wasp executable path with possibly vs-code specific path variables,
+// returns interpolated executable path that can then be normally used.
+// If no path is given, it returns default path to wasp executable.
+function resolveWaspExecutablePath(userDefinedWaspExecutablePath: string): string {
+  if (!userDefinedWaspExecutablePath) return 'wasp';
+  console.log(`Trying to find the server executable in ${userDefinedWaspExecutablePath}`);
+  let resolvedPath = interpolateVSCodeSpecificExecutablePath(userDefinedWaspExecutablePath)
+  console.log(`Location after path variables subsitution: ${resolvedPath}`);
+  return resolvedPath;
 }
 
-// Runs the executable in `version` mode and checks that it:
+// Given a path to executable that contains common vscode-specific path variables,
+// replaces those variables with proper values.
+function interpolateVSCodeSpecificExecutablePath(executablePath: string): string {
+    // Interpolate in values for common vscode path variables
+
+    // Path variable for home directory
+    executablePath = executablePath
+        .replace('${HOME}', os.homedir)
+        .replace('${home}', os.homedir)
+        .replace(/^~/, os.homedir);
+
+    // Path variable for workspace folder
+    let folders = workspace.workspaceFolders;
+    if (folders) {
+        let folder = folders[0];
+        if (folder) {
+            executablePath = executablePath
+                .replace('${workspaceFolder}', folder.uri.path)
+                .replace('${workspaceRoot}', folder.uri.path);
+        }
+    }
+
+    return executablePath
+}
+
+// Runs the wasp executable in `version` mode and checks that it:
 // - Exits successfuly
 // - Exits within 1 second
 //
 // If it fails either of these checks, a status is returned to show that the
 // executable path is not valid.
-async function checkExecutable(executablePath: string): Promise<Status> {
+async function checkWaspExecutable(executablePath: string): Promise<Status> {
   const execPromise = promisify(execFile)
     (executablePath, ['version'], { timeout: 2000, windowsHide: true })
     .then(() => Status.Available).catch(_err => Status.Missing);
