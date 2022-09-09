@@ -43,7 +43,9 @@ VSCode needs .json, not .yaml -> use `npm run compile-yaml` to generate .json fr
    run "Developer: Inspect Editor Tokens and Scopes" command to get a popup for each token showing
    how it got clasified/scoped by extension -> this is great for figuring out if extension does what it should do,
    which is at the end, applying correct scopes.
-7. Repeat step 4.
+7. To see output produced by `outputChannel.appendLine(...)`, select `Output` tab in vscode at the bottom,
+   and then on the right choose to see output from Wasp Language Server. This is useful for debugging.
+8. Repeat step 4.
 
 For features implemented in typescript, the entry point for the project is `src/extension.ts`.
 Use `npm run compile-ts` to compile the typescript code, or `npm run watch` to 
