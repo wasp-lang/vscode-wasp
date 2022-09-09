@@ -23,19 +23,23 @@ export async function activate(context: ExtensionContext) {
   const executablePath = resolveWaspExecutablePath(config.server.executable);
 
   // Check if the path points to a valid wasp executable
-  const executableStatus = await checkWaspExecutable(executablePath);
+  const waspExecResult = await getWaspExecutableVersion(executablePath);
 
-  if (executableStatus !== Status.Available) {
-    if (executableStatus === Status.Timedout) {
+  let waspVersion:string
+  if (typeof(waspExecResult) === 'string') {
+    waspVersion = waspExecResult;
+    outputChannel.appendLine("Confirmed that wasp executable is accessible, version " + waspVersion);
+  } else {
+    if (waspExecResult === ExecutableErrorStatus.Timedout) {
       window.showInformationMessage(`The wasp server process has timed out.`);
-    } else {
+    } else if (waspExecResult === ExecutableErrorStatus.Missing) {
       if (executablePath === 'wasp') {
         window.showErrorMessage('No `wasp` executable is available in the VSCode PATH.');
-        return;
       } else {
         window.showInformationMessage(`The user defined executable path couldn't be run: [${executablePath}].`);
       }
     }
+    return;
   }
 
   // TODO: send these settings to wasp language server so it can update its logging output if
@@ -74,16 +78,32 @@ export async function activate(context: ExtensionContext) {
     clientOptions,
   );
 
-  client.start();
-  outputChannel.appendLine('..Wasp LSP Server has been started..');
+  outputChannel.appendLine('Starting Wasp LSP Server..');
+  client.start()
+    .then(() => {
+      outputChannel.appendLine('..Wasp LSP Server has been successfully started!');
+    })
+    .catch((err) => {
+      let failedToConnectErrorMsg = "Failed to connect to Wasp language server! Advanced Wasp IDE features won't work."
+      const requiredWaspVersion = "6.0.0"  // Because earlier wasp versions don't have language server capabilities.
+      if (compareSimpleSemvers(waspVersion, "6.0.0") === -1) {
+        failedToConnectErrorMsg += ` CAUSE: Your Wasp version is ${waspVersion}, but it should be at least ${requiredWaspVersion}.`
+      }
+      outputChannel.appendLine(".." + failedToConnectErrorMsg);
+      // NOTE: I use timeout here so this error message doesn't get printed at the same time as the error messages produced by the
+      // LanguageClient itself (and it produces a bunch of them), because if they all get very close in time vscode hides them immediately
+      // due to there being too many of them at the same moment. By using timeout, our message gets separated and stays for some time as a popup,
+      // instead of skipping directly into notification tray.
+      setTimeout(() => window.showErrorMessage(failedToConnectErrorMsg), 1000)
+    });
 
   // Register command to restart wasp language server.
   context.subscriptions.push(commands.registerCommand('vscode-wasp.restartLanguageServer', async () => {
     if (client) {
       try {
-        console.log(`..Restarting Wasp LSP Server..`);
+        outputChannel.appendLine(`Restarting Wasp LSP Server..`);
         await client.restart();
-        console.log(`..Wasp LSP Server has been restarted..`);
+        outputChannel.appendLine(`..Wasp LSP Server has been restarted!`);
       } catch (err) {
         outputChannel.appendLine(`Couldn't restart Wasp LSP Server: ${err.message}`);
       }
@@ -139,24 +159,30 @@ function interpolateVSCodeSpecificExecutablePath(executablePath: string): string
 //
 // If it fails either of these checks, a status is returned to show that the
 // executable path is not valid.
-async function checkWaspExecutable(executablePath: string): Promise<Status> {
-  const execPromise = promisify(execFile)
-    (executablePath, ['version'], { timeout: 2000, windowsHide: true })
-    .then(() => Status.Available).catch(_err => Status.Missing);
+async function getWaspExecutableVersion(executablePath: string): Promise<ExecutableErrorStatus | string> {
+  const execFileP = promisify(execFile);
+  const execPromise = execFileP(executablePath, ['version'], { timeout: 2000, windowsHide: true })
+    .then(({stdout}) => stdout)
+    .catch(_err => ExecutableErrorStatus.Missing);
 
-  const timeoutPromise = new Promise<Status>((resolve, _reject) => {
-    let timer = setTimeout(() => {
-      clearTimeout(timer);
-      resolve(Status.Timedout);
-    }, 1000);
-  });
+  const timeoutPromise = new Promise<ExecutableErrorStatus>((resolve) => setTimeout(() => resolve(ExecutableErrorStatus.Timedout), 1000));
 
   return Promise.race([execPromise, timeoutPromise]);
 }
 
-// Executable status types
-enum Status {
-  Available = 'available',
-  Missing = 'missing',
-  Timedout = 'timedout',
+enum ExecutableErrorStatus { Missing, Timedout }
+
+// Given two semantic version strings, returns -1 if first version is smaller than the second,
+// 0 if they are the same, or 1 if second version is bigger than the first.
+function compareSimpleSemvers(v1: string, v2: string) {
+  function parseSemver(v:string) { return v.split('.').map(n => parseInt(n)) };
+  const v1Parsed = parseSemver(v1);
+  const v2Parsed = parseSemver(v2);
+  for (let i = 0; i < Math.min(v1Parsed.length, v2Parsed.length); i++) {
+    if (v1Parsed[i] > v2Parsed[i]) return 1;
+    else if (v1Parsed[i] < v2Parsed[i]) return -1;
+  }
+  if (v1Parsed.length < v2Parsed.length) return -1;
+  else if (v1Parsed.length > v2Parsed.length) return 1;
+  else return 0;
 }
