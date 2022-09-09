@@ -85,7 +85,7 @@ export async function activate(context: ExtensionContext) {
     })
     .catch((err) => {
       let failedToConnectErrorMsg = "Failed to connect to Wasp language server! Advanced Wasp IDE features won't work."
-      const requiredWaspVersion = "6.0.0"  // Because earlier wasp versions don't have language server capabilities.
+      const requiredWaspVersion = "0.6.0.0"  // Because earlier wasp versions don't have language server capabilities.
       if (compareSimpleSemvers(waspVersion, "6.0.0") === -1) {
         failedToConnectErrorMsg += ` CAUSE: Your Wasp version is ${waspVersion}, but it should be at least ${requiredWaspVersion}.`
       }
