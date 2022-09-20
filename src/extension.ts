@@ -82,7 +82,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     .then(() => {
       outputChannel.appendLine('..Wasp LSP Server has been successfully started!');
     })
-    .catch((_err) => {
+    .catch(() => {
       let failedToConnectErrorMsg = "Failed to connect to Wasp language server! Advanced Wasp IDE features won't work."
       const earliestWaspVersionWithLspCapabilities = "0.6.0.0"
       if (compareSimpleSemvers(waspVersion, earliestWaspVersionWithLspCapabilities) === -1) {
@@ -110,7 +110,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
   }));
 }
 
-export function deactivate() {
+export function deactivate(): void {
   if (client) {
     client.stop();
   }
