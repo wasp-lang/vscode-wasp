@@ -25,8 +25,8 @@ export async function activate(context: ExtensionContext) {
   // Check if the path points to a valid wasp executable
   const waspExecResult = await getWaspExecutableVersion(executablePath);
 
-  let waspVersion:string
-  if (typeof(waspExecResult) === 'string') {
+  let waspVersion: string
+  if (typeof (waspExecResult) === 'string') {
     waspVersion = waspExecResult;
     outputChannel.appendLine("Confirmed that wasp executable is accessible, version " + waspVersion);
   } else {
@@ -131,26 +131,26 @@ function resolveWaspExecutablePath(userDefinedWaspExecutablePath: string): strin
 // Given a path to executable that contains common vscode-specific path variables,
 // replaces those variables with proper values.
 function interpolateVSCodeSpecificExecutablePath(executablePath: string): string {
-    // Interpolate in values for common vscode path variables
+  // Interpolate in values for common vscode path variables
 
-    // Path variable for home directory
-    executablePath = executablePath
-        .replace('${HOME}', os.homedir)
-        .replace('${home}', os.homedir)
-        .replace(/^~/, os.homedir);
+  // Path variable for home directory
+  executablePath = executablePath
+    .replace('${HOME}', os.homedir)
+    .replace('${home}', os.homedir)
+    .replace(/^~/, os.homedir);
 
-    // Path variable for workspace folder
-    let folders = workspace.workspaceFolders;
-    if (folders) {
-        let folder = folders[0];
-        if (folder) {
-            executablePath = executablePath
-                .replace('${workspaceFolder}', folder.uri.path)
-                .replace('${workspaceRoot}', folder.uri.path);
-        }
+  // Path variable for workspace folder
+  let folders = workspace.workspaceFolders;
+  if (folders) {
+    let folder = folders[0];
+    if (folder) {
+      executablePath = executablePath
+        .replace('${workspaceFolder}', folder.uri.path)
+        .replace('${workspaceRoot}', folder.uri.path);
     }
+  }
 
-    return executablePath
+  return executablePath
 }
 
 // Runs the wasp executable in `version` mode and checks that it:
@@ -162,7 +162,7 @@ function interpolateVSCodeSpecificExecutablePath(executablePath: string): string
 async function getWaspExecutableVersion(executablePath: string): Promise<ExecutableErrorStatus | string> {
   const execFileP = promisify(execFile);
   const execPromise = execFileP(executablePath, ['version'], { timeout: 2000, windowsHide: true })
-    .then(({stdout}) => stdout)
+    .then(({ stdout }) => stdout)
     .catch(_err => ExecutableErrorStatus.Missing);
 
   const timeoutPromise = new Promise<ExecutableErrorStatus>((resolve) => setTimeout(() => resolve(ExecutableErrorStatus.Timedout), 1000));
@@ -175,7 +175,7 @@ enum ExecutableErrorStatus { Missing, Timedout }
 // Given two semantic version strings, returns -1 if first version is smaller than the second,
 // 0 if they are the same, or 1 if second version is bigger than the first.
 function compareSimpleSemvers(v1: string, v2: string) {
-  function parseSemver(v:string) { return v.split('.').map(n => parseInt(n)) };
+  function parseSemver(v: string) { return v.split('.').map(n => parseInt(n)) };
   const v1Parsed = parseSemver(v1);
   const v2Parsed = parseSemver(v2);
   for (let i = 0; i < Math.min(v1Parsed.length, v2Parsed.length); i++) {
