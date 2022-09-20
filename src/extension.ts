@@ -178,8 +178,8 @@ function compareSimpleSemvers(v1: string, v2: string): -1|0|1  {
   const v1Parsed = parseSemver(v1);
   const v2Parsed = parseSemver(v2);
   for (let i = 0; i < Math.min(v1Parsed.length, v2Parsed.length); i++) {
-    if (v1Parsed[i] > v2Parsed[i]) return GT;
-    else if (v1Parsed[i] < v2Parsed[i]) return LT;
+    if (v1Parsed[i] < v2Parsed[i]) return LT;
+    else if (v1Parsed[i] > v2Parsed[i]) return GT;
   }
   if (v1Parsed.length < v2Parsed.length) return LT;
   else if (v1Parsed.length > v2Parsed.length) return GT;
