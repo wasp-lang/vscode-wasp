@@ -10,11 +10,11 @@ import {
 import { promisify } from 'util';
 import { execFile } from 'child_process';
 
-let client: LanguageClient;
+let client: LanguageClient | null = null;
 
 const outputChannel = window.createOutputChannel('Wasp Language Server');
 
-export async function activate(context: ExtensionContext) {
+export async function activate(context: ExtensionContext): Promise<void> {
   console.log('..Extension "vscode-wasp" is now active..');
 
   // Configuration name and properties are set in package.json
@@ -25,13 +25,9 @@ export async function activate(context: ExtensionContext) {
   // Check if the path points to a valid wasp executable
   const waspExecResult = await getWaspExecutableVersion(executablePath);
 
-  let waspVersion: string
-  if (typeof (waspExecResult) === 'string') {
-    waspVersion = waspExecResult;
-    outputChannel.appendLine("Confirmed that wasp executable is accessible, version " + waspVersion);
-  } else {
+  if (typeof waspExecResult !== 'string') {
     if (waspExecResult === ExecutableErrorStatus.Timedout) {
-      window.showInformationMessage(`The wasp server process has timed out.`);
+      window.showInformationMessage('The wasp server process has timed out.');
     } else if (waspExecResult === ExecutableErrorStatus.Missing) {
       if (executablePath === 'wasp') {
         window.showErrorMessage('No `wasp` executable is available in the VSCode PATH.');
@@ -42,6 +38,9 @@ export async function activate(context: ExtensionContext) {
     return;
   }
 
+  const waspVersion = waspExecResult;
+  outputChannel.appendLine("Confirmed that wasp executable is accessible, version " + waspVersion);
+
   // TODO: send these settings to wasp language server so it can update its logging output if
   // these are changed while the language server is running
   const useOutputPanel = config.server.useOutputPanelForLogging;
@@ -49,10 +48,10 @@ export async function activate(context: ExtensionContext) {
   const logFileOpt = logFile.trim() === '' ? [] : ['--log=' + logFile];
 
   // Configure vscode-languageclient
-  let runArgs = ['waspls', ...logFileOpt];
-  let debugArgs = ['waspls', ...logFileOpt];
+  const runArgs = ['waspls', ...logFileOpt];
+  const debugArgs = ['waspls', ...logFileOpt];
 
-  let serverOptions: ServerOptions = {
+  const serverOptions: ServerOptions = {
     run: {
       command: executablePath,
       transport: TransportKind.stdio,
@@ -65,7 +64,7 @@ export async function activate(context: ExtensionContext) {
     }
   };
 
-  let clientOptions: LanguageClientOptions = {
+  const clientOptions: LanguageClientOptions = {
     documentSelector: [{ scheme: 'file', language: 'wasp' }],
     initializationOptions: { 'vscode-wasp': workspace.getConfiguration('vscode-wasp') },
     outputChannel: outputChannel
@@ -83,11 +82,11 @@ export async function activate(context: ExtensionContext) {
     .then(() => {
       outputChannel.appendLine('..Wasp LSP Server has been successfully started!');
     })
-    .catch((err) => {
+    .catch((_err) => {
       let failedToConnectErrorMsg = "Failed to connect to Wasp language server! Advanced Wasp IDE features won't work."
-      const requiredWaspVersion = "0.6.0.0"  // Because earlier wasp versions don't have language server capabilities.
-      if (compareSimpleSemvers(waspVersion, "6.0.0") === -1) {
-        failedToConnectErrorMsg += ` CAUSE: Your Wasp version is ${waspVersion}, but it should be at least ${requiredWaspVersion}.`
+      const earliestWaspVersionWithLspCapabilities = "0.6.0.0"
+      if (compareSimpleSemvers(waspVersion, earliestWaspVersionWithLspCapabilities) === -1) {
+        failedToConnectErrorMsg += ` CAUSE: Your Wasp version is ${waspVersion}, but it should be at least ${earliestWaspVersionWithLspCapabilities}.`
       }
       outputChannel.appendLine(".." + failedToConnectErrorMsg);
       // NOTE: I use timeout here so this error message doesn't get printed at the same time as the error messages produced by the
@@ -99,14 +98,14 @@ export async function activate(context: ExtensionContext) {
 
   // Register command to restart wasp language server.
   context.subscriptions.push(commands.registerCommand('vscode-wasp.restartLanguageServer', async () => {
-    if (client) {
-      try {
-        outputChannel.appendLine(`Restarting Wasp LSP Server..`);
-        await client.restart();
-        outputChannel.appendLine(`..Wasp LSP Server has been restarted!`);
-      } catch (err) {
-        outputChannel.appendLine(`Couldn't restart Wasp LSP Server: ${err.message}`);
-      }
+    if (!client) return;
+    try {
+      outputChannel.appendLine(`Restarting Wasp LSP Server..`);
+      await client.restart();
+      outputChannel.appendLine(`..Wasp LSP Server has been restarted!`);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : err
+      outputChannel.appendLine(`Couldn't restart Wasp LSP Server: ${errMsg}`);
     }
   }));
 }
@@ -123,7 +122,7 @@ export function deactivate() {
 function resolveWaspExecutablePath(userDefinedWaspExecutablePath: string): string {
   if (!userDefinedWaspExecutablePath) return 'wasp';
   console.log(`Trying to find the server executable in ${userDefinedWaspExecutablePath}`);
-  let resolvedPath = interpolateVSCodeSpecificExecutablePath(userDefinedWaspExecutablePath)
+  const resolvedPath = interpolateVSCodeSpecificExecutablePath(userDefinedWaspExecutablePath)
   console.log(`Location after path variables subsitution: ${resolvedPath}`);
   return resolvedPath;
 }
@@ -140,9 +139,9 @@ function interpolateVSCodeSpecificExecutablePath(executablePath: string): string
     .replace(/^~/, os.homedir);
 
   // Path variable for workspace folder
-  let folders = workspace.workspaceFolders;
+  const folders = workspace.workspaceFolders;
   if (folders) {
-    let folder = folders[0];
+    const folder = folders[0];
     if (folder) {
       executablePath = executablePath
         .replace('${workspaceFolder}', folder.uri.path)
@@ -173,16 +172,21 @@ async function getWaspExecutableVersion(executablePath: string): Promise<Executa
 enum ExecutableErrorStatus { Missing, Timedout }
 
 // Given two semantic version strings, returns -1 if first version is smaller than the second,
-// 0 if they are the same, or 1 if second version is bigger than the first.
-function compareSimpleSemvers(v1: string, v2: string) {
-  function parseSemver(v: string) { return v.split('.').map(n => parseInt(n)) };
+// 0 if they are the same, or 1 if first version is bigger than the second.
+function compareSimpleSemvers(v1: string, v2: string): -1|0|1  {
+  const LT = -1, GT = 1, EQ = 0;
   const v1Parsed = parseSemver(v1);
   const v2Parsed = parseSemver(v2);
   for (let i = 0; i < Math.min(v1Parsed.length, v2Parsed.length); i++) {
-    if (v1Parsed[i] > v2Parsed[i]) return 1;
-    else if (v1Parsed[i] < v2Parsed[i]) return -1;
+    if (v1Parsed[i] > v2Parsed[i]) return GT;
+    else if (v1Parsed[i] < v2Parsed[i]) return LT;
   }
-  if (v1Parsed.length < v2Parsed.length) return -1;
-  else if (v1Parsed.length > v2Parsed.length) return 1;
-  else return 0;
+  if (v1Parsed.length < v2Parsed.length) return LT;
+  else if (v1Parsed.length > v2Parsed.length) return GT;
+  else return EQ;
 }
+
+// Parses simple semver string into list of numbers.
+function parseSemver(v: string): number[] {
+  return v.split('.').map(n => parseInt(n))
+};
