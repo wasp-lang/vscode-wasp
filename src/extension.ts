@@ -162,7 +162,7 @@ async function getWaspExecutableVersion(executablePath: string): Promise<Executa
   const execFileP = promisify(execFile);
   const execPromise = execFileP(executablePath, ['version'], { timeout: 2000, windowsHide: true })
     .then(({ stdout }) => stdout)
-    .catch(_err => ExecutableErrorStatus.Missing);
+    .catch(() => ExecutableErrorStatus.Missing);
 
   const timeoutPromise = new Promise<ExecutableErrorStatus>((resolve) => setTimeout(() => resolve(ExecutableErrorStatus.Timedout), 1000));
 
@@ -173,7 +173,7 @@ enum ExecutableErrorStatus { Missing, Timedout }
 
 // Given two semantic version strings, returns -1 if first version is smaller than the second,
 // 0 if they are the same, or 1 if first version is bigger than the second.
-function compareSimpleSemvers(v1: string, v2: string): -1|0|1  {
+function compareSimpleSemvers(v1: string, v2: string): -1 | 0 | 1 {
   const LT = -1, GT = 1, EQ = 0;
   const v1Parsed = parseSemver(v1);
   const v2Parsed = parseSemver(v2);
