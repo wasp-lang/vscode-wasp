@@ -8,18 +8,14 @@ Features:
 - Syntax highlighting for `.wasp` files
 - Snippets for `.wasp` files
 - Wasp language server
+  - live reporting of compilation errors
+  - autocompletion
 
-### Using the Wasp language server
+## Requirements
 
-`waspls` (the Wasp language server) is very early in development and is not
-bundled with this extension or available for binary download. To set it up now:
-
-1. Clone https://github.com/wasp-lang/wasp
-2. Navigate to `waspls` directory
-3. Run `cabal build` (requires Haskell toolchain to be installed)
-4. Open vscode with this extension enabled, find the `Vscode-wasp: Executable`
-   setting, and enter the path to the binary created in step 3.
-5. Reload vscode.
+Wasp language extension requires you only to have `wasp` installed on your machine and available in PATH,
+which you almost certainly already have if you are developing in wasp.
+If not, [check installation instruction here](https://wasp-lang.dev/docs).
 
 ## Development (for contributors)
 ### Resources
@@ -27,31 +23,35 @@ bundled with this extension or available for binary download. To set it up now:
 - Great tutorial with practical examples: https://gist.github.com/Aerijo/b8c82d647db783187804e86fa0a604a1 .
 - Somewhat more theoretical guide of TextMate grammar: https://www.apeth.com/nonblog/stories/textmatebundle.html .
 
-### Workflow
-Grammar is defined in `syntaxes/wasp.tmLanguage.yaml`, and you do most of the changes there.
+### Setup
+Run `npm install`.
 
+### Workflow
+Grammar (used for syntax highlighting) is defined in `syntaxes/wasp.tmLanguage.yaml`, and you do most of the changes there.
 VSCode needs .json, not .yaml -> use `npm run compile-yaml` to generate .json from .yaml.
 
 `package.json` is also important -> besides general settings, we also define embedded languages and extension dependencies there.
 
+0. Compile your latest code with `npm run compile`.
 1. Open root dir of this project with VSCode.
 2. Run F5 -> this will start another, "testing" window with extension loaded and working.
 3. In "testing" window: open some .wasp file to see how extension works.
 4. Modify extension source with new changes (most likely `syntaxes/wasp.tmLanguage.yaml`)
-   and run `npm run build` to regenerate .json.
+   and run `npm run compile` to regenerate files.
 5. In "testing" window: run "Reload Window" command to load updated version of extension.
 6. In "testing" window: while inspecting .wasp file to see how extension works, you can
    run "Developer: Inspect Editor Tokens and Scopes" command to get a popup for each token showing
    how it got clasified/scoped by extension -> this is great for figuring out if extension does what it should do,
    which is at the end, applying correct scopes.
-7. Repeat step 4.
+7. To see the output produced by `outputChannel.appendLine(...)`, open the `Output` tab in VS Code
+   and select _Wasp Language Server_ from the dropdown menu in the upper-right corner. This is useful for debugging.
+8. Repeat step 4.
 
 For features implemented in typescript, the entry point for the project is `src/extension.ts`.
 Use `npm run compile-ts` to compile the typescript code, or `npm run watch` to 
 automatically recompile on changes.
 
-Use `npm run compile` to compile typescript code and convert the TextMate grammar
-to JSON.
+Use `npm run compile` to both compile typescript code to javascript and to convert the TextMate grammar from YAML to JSON.
 
 ### Publish
 Make sure you have `vsce` installed: `npm -g install vsce`.

@@ -7,7 +7,7 @@
     "color": "#2a2c2d",
     "theme": "dark"
   },
-  "version": "0.0.5",
+  "version": "0.1.0",
   "publisher": "wasp-lang",
   "engines": {
     "vscode": "^1.42.0"
@@ -62,7 +62,7 @@
         "wasp.server.executable": {
           "scope": "resource",
           "type": "string",
-          "description": "Path to wasp language server executable. Tries to use waspls on PATH if not set."
+          "description": "Path to wasp executable. Tries to use wasp on PATH if not set."
         },
         "wasp.server.useOutputPanelForLogging": {
           "scope": "resource",
