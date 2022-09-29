@@ -27,17 +27,21 @@ If not, [check installation instruction here](https://wasp-lang.dev/docs).
 Run `npm install`.
 
 ### Workflow
-Grammar (used for syntax highlighting) is defined in `syntaxes/wasp.tmLanguage.yaml`, and you do most of the changes there.
-VSCode needs .json, not .yaml -> use `npm run compile-yaml` to generate .json from .yaml.
+
+Main extension logic is implemented in `src/extension.ts`.
+NOTE: VSCode needs .js, not .ts, so make sure to run `npm run build` when you do changes.
+
+Grammar (used for syntax highlighting) is defined in `syntaxes/wasp.tmLanguage.yaml`.
+NOTE: VSCode needs .json, not .yaml, so make sure to run `npm run build` when you do changes.
 
 `package.json` is also important -> besides general settings, we also define embedded languages and extension dependencies there.
 
-0. Compile your latest code with `npm run compile`.
+0. Build your latest code with `npm run build`. This will compile Typescript to Javascript, compile `syntaxes/*.yaml` to .json, and package it all.
 1. Open root dir of this project with VSCode.
 2. Run F5 -> this will start another, "testing" window with extension loaded and working.
 3. In "testing" window: open some .wasp file to see how extension works.
-4. Modify extension source with new changes (most likely `syntaxes/wasp.tmLanguage.yaml`)
-   and run `npm run compile` to regenerate files.
+4. Modify extension source with new changes (most likely `syntaxes/wasp.tmLanguage.yaml` or `src/extension.ts`)
+   and run `npm run build` to regenerate files.
 5. In "testing" window: run "Reload Window" command to load updated version of extension.
 6. In "testing" window: while inspecting .wasp file to see how extension works, you can
    run "Developer: Inspect Editor Tokens and Scopes" command to get a popup for each token showing
@@ -47,11 +51,9 @@ VSCode needs .json, not .yaml -> use `npm run compile-yaml` to generate .json fr
    and select _Wasp Language Server_ from the dropdown menu in the upper-right corner. This is useful for debugging.
 8. Repeat step 4.
 
-For features implemented in typescript, the entry point for the project is `src/extension.ts`.
-Use `npm run compile-ts` to compile the typescript code, or `npm run watch` to 
-automatically recompile on changes.
+You can also use `npm run watch` to automatically recompile on changes - but keep in mind, this doesn't automatically recompile `syntaxes/*.yaml` to .json, for that you will have to re-run `npm run watch` or run `npm run build`.
 
-Use `npm run compile` to both compile typescript code to javascript and to convert the TextMate grammar from YAML to JSON.
+NOTE: Internally, in package.json, we use `es-build` to compile Typescript to Javascript and to then package it all into one .js file (which means it takes our source .js files, the ones we generated from .ts, and combines them together with deps from node_modules into a single .js file). We could have just used `tsc` (Typescript compiler) to compile TS to JS, but it doesn't do the bundling part, which is recommended by VSCode.
 
 ### Publish
 Make sure you have `vsce` installed: `npm -g install vsce`.
@@ -60,5 +62,7 @@ Next, make sure you are logged in with the publisher.
 If you are not logged in yet, you can log in with `vsce login wasp-lang`.
 
 To package the extension into a .vsix file, run `vsce package`.
+
+NOTE: .vscodeignore file determines which files are ommited/ignored when constructing a package, so make sure to update it if there are some new build artefacts or some other files that we don't want included in the final package.
 
 To package and then publish the extension, run `vsce publish`.
