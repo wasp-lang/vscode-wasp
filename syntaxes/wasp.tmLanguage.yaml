@@ -61,7 +61,7 @@ repository:
       match: "\\b(true|false)"
     - comment: Enum values
       name: constant.language.enum.wasp
-      match: "\\b(EmailAndPassword|PostgreSQL|SQLite|Simple|PgBoss|SMTP|SendGrid|MailGun)"
+      match: "\\b(EmailAndPassword|PostgreSQL|SQLite|Simple|PgBoss|SMTP|SendGrid|Mailgun)"
     
   # From https://github.com/textmate/javascript.tmbundle/blob/master/Syntaxes/JavaScript.plist#L49
   # Explanatory comments added by Wasp Team
