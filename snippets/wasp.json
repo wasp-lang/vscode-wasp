@@ -5,7 +5,7 @@
     "body": [
       "route ${1:Name}Route { path: \"/${2:path}\", to: ${1:Name} }",
       "page ${1:Name} {",
-      "\tcomponent: import ${1:name} from \"@ext/${3:component}\"",
+      "\tcomponent: import ${1:name} from \"@client/${3:component}\"",
       "}"
     ]
   },
@@ -14,7 +14,7 @@
     "prefix": "query",
     "body": [
       "query ${1:name} {",
-      "\tfn: import ${2:function} from \"@ext/${3:sourceFile}\",",
+      "\tfn: import ${2:function} from \"@server/${3:sourceFile}\",",
       "\tentities: [${4:Entities}]",
       "}"
     ]
@@ -24,7 +24,7 @@
     "prefix": "action",
     "body": [
       "action ${1:name} {",
-      "\tfn: import ${2:function} from \"@ext/${3:sourceFile}\",",
+      "\tfn: import ${2:function} from \"@server/${3:sourceFile}\",",
       "\tentities: [${4:Entities}]",
       "}"
     ]
