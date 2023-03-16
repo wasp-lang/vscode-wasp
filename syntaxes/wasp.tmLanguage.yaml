@@ -19,7 +19,7 @@ repository:
   type:
     patterns:
       - name: storage.type.wasp # Declaration types
-        match: "\\b(action|app|entity|job|page|query|route)"
+        match: "\\b(action|api|app|entity|job|page|query|route)"
 
   declVariable:
     patterns:
@@ -62,7 +62,10 @@ repository:
     - comment: Enum values
       name: constant.language.enum.wasp
       match: "\\b(EmailAndPassword|PostgreSQL|SQLite|Simple|PgBoss|SMTP|SendGrid|Mailgun)"
-    
+    - comment: HTTP method enum values
+      name: constant.language.httpMethod.enum.wasp
+      match: "\\b(ALL|GET|POST|PUT|DELETE)"
+
   # From https://github.com/textmate/javascript.tmbundle/blob/master/Syntaxes/JavaScript.plist#L49
   # Explanatory comments added by Wasp Team
   jsImport:
