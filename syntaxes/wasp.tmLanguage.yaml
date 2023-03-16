@@ -62,7 +62,7 @@ repository:
     - comment: Enum values
       name: constant.language.enum.wasp
       match: "\\b(EmailAndPassword|PostgreSQL|SQLite|Simple|PgBoss|SMTP|SendGrid|Mailgun)"
-    - comment: Http method enum values
+    - comment: HTTP method enum values
       name: constant.language.httpMethod.enum.wasp
       match: "\\b(ALL|GET|POST|PUT|DELETE)"
 
