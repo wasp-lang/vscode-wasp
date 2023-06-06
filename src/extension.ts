@@ -25,14 +25,14 @@ export async function activate(context: ExtensionContext): Promise<void> {
   // Check if the path points to a valid wasp executable
   const waspExecResult = await getWaspExecutableVersion(executablePath);
 
-  if (typeof waspExecResult !== 'string') {
-    if (waspExecResult === ExecutableErrorStatus.Timedout) {
-      window.showInformationMessage('The wasp server process has timed out.');
-    } else if (waspExecResult === ExecutableErrorStatus.Missing) {
+  if (typeof waspExecResult !== "string") {
+    if (waspExecResult.type === "WaspVersionTimedout") {
+      window.showErrorMessage('The wasp server process has timed out.');
+    } else if (waspExecResult.type === "WaspExeMissing") {
       if (executablePath === 'wasp') {
         window.showErrorMessage('No `wasp` executable is available in the VSCode PATH.');
       } else {
-        window.showInformationMessage(`The user defined executable path couldn't be run: [${executablePath}].`);
+        window.showErrorMessage(`The user defined executable path couldn't be run: ${executablePath} . More details: ${waspExecResult.error}`);
       }
     }
     return;
@@ -158,18 +158,20 @@ function interpolateVSCodeSpecificExecutablePath(executablePath: string): string
 //
 // If it fails either of these checks, a status is returned to show that the
 // executable path is not valid.
-async function getWaspExecutableVersion(executablePath: string): Promise<ExecutableErrorStatus | string> {
+async function getWaspExecutableVersion(executablePath: string): Promise<WaspVersionError | string> {
   const execFileP = promisify(execFile);
   const execPromise = execFileP(executablePath, ['version'], { timeout: 2000, windowsHide: true })
-    .then(({ stdout }) => stdout)
-    .catch(() => ExecutableErrorStatus.Missing);
+    .then(({ stdout }) => stdout.split("\n")[0])  // We assume `wasp version` returns version as a single string in the first line, with nothing else.
+    .catch((e) => ({ type: "WaspExeMissing", error: e } as WaspExeMissing));
 
-  const timeoutPromise = new Promise<ExecutableErrorStatus>((resolve) => setTimeout(() => resolve(ExecutableErrorStatus.Timedout), 1000));
+  const timeoutPromise = new Promise<WaspVersionTimedout>((resolve) => setTimeout(() => resolve({ type: "WaspVersionTimedout" } as WaspVersionTimedout), 1000));
 
   return Promise.race([execPromise, timeoutPromise]);
 }
 
-enum ExecutableErrorStatus { Missing, Timedout }
+type WaspVersionError = WaspExeMissing | WaspVersionTimedout
+interface WaspExeMissing { type: "WaspExeMissing", error: any }
+interface WaspVersionTimedout { type: "WaspVersionTimedout" }
 
 // Given two semantic version strings, returns -1 if first version is smaller than the second,
 // 0 if they are the same, or 1 if first version is bigger than the second.
