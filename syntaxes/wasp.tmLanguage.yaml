@@ -19,7 +19,7 @@ repository:
   type:
     patterns:
       - name: storage.type.wasp # Declaration types
-        match: "\\b(action|apiNamespace|api|app|entity|job|page|query|route)"
+        match: "\\b(action|apiNamespace|api|app|entity|job|page|query|route|crud)"
 
   declVariable:
     patterns:
