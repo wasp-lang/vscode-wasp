@@ -40,6 +40,7 @@ repository:
       - include: "#prismaClosure"
       - include: "#jsonClosure"
       - include: "#array"
+      - include: "#tuple"
       - include: "#dict"
       - include: "#variable"
 
@@ -160,6 +161,26 @@ repository:
       - comment: Where a comma is a expected but something else was found
         name: invalid.illegal.expected-array-separator.wasp
         match: "[^\\s\\]]"
+
+  tuple:
+    name: meta.structure.tuple.wasp
+    begin: "\\("
+    beginCaptures:
+      0:
+        name: punctuation.separator.tuple.begin.wasp
+    end: "\\)"
+    endCaptures:
+      0:
+        name: punctuation.separator.tuple.end.wasp
+    patterns:
+      - include: "#comment"
+      - include: "#value"
+      - comment: Comma separators in an tuple
+        name: punctuation.separator.tuple.wasp
+        match: ","
+      - comment: Where a comma is a expected but something else was found
+        name: invalid.illegal.expected-tuple-separator.wasp
+        match: "[^\\s\\)]"
 
   dict:
     name: meta.structure.dictionary.wasp
