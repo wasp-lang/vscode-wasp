@@ -186,6 +186,7 @@ repository:
             name: punctuation.separator.dictionary.pair.wasp
         name: meta.structure.dictionary.value.wasp
         patterns:
+          - include: "#comment"
           - include: "#value"
           - comment: Something unexpected
             name: invalid.illegal.expected-dictionary-separator.wasp
