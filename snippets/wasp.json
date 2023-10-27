@@ -5,7 +5,7 @@
     "body": [
       "route ${1:Name}Route { path: \"/${2:path}\", to: ${1:Name} }",
       "page ${1:Name} {",
-      "\tcomponent: import ${1:name} from \"@client/${3:component}\"",
+      "\tcomponent: import ${1:name} from \"@client/${3:sourceFile}\"",
       "}"
     ]
   },
@@ -15,7 +15,7 @@
     "body": [
       "query ${1:name} {",
       "\tfn: import ${2:function} from \"@server/${3:sourceFile}\",",
-      "\tentities: [${4:Entities}]",
+      "\tentities: [$4]",
       "}"
     ]
   },
@@ -25,7 +25,7 @@
     "body": [
       "action ${1:name} {",
       "\tfn: import ${2:function} from \"@server/${3:sourceFile}\",",
-      "\tentities: [${4:Entities}]",
+      "\tentities: [$4]",
       "}"
     ]
   },
@@ -36,6 +36,56 @@
       "entity ${1:Name} {=psl",
       "\t${2:schema}",
       "psl=}"
+    ]
+  },
+
+  "Job": {
+    "prefix": "job",
+    "body": [
+      "job ${1:Name} {",
+      "\texecutor: PgBoss,",
+      "\tperform: {",
+      "\t\tfn: import ${2:FnName} from \"@server/${3:sourceFile}\"",
+      "\t},",
+      "\tentities: [$4],",
+      "}"
+    ]
+  },
+
+  "Api": {
+    "prefix": "api",
+    "body": [
+      "api ${1:name} {",
+      "\thttpRoute: (${2:GET}, \"${3:path}\"),",
+      "\tfn: import ${4:function} from \"@server/${5:sourceFile}\",",
+      "\tentities: [$6]",
+      "}"
+    ]
+  },
+
+  "Api Namespace": {
+    "prefix": "apiNamespace",
+    "body": [
+      "apiNamespace ${1:name} {",
+      "\tmiddlewareConfigFn: import ${2:middlewareFn} from \"@server/${3:sourceFile}\",",
+      "\tpath: \"${4:path}\"",
+      "}"
+    ]
+  },
+
+  "Crud": {
+    "prefix": "crud",
+    "body": [
+      "crud ${1:Name} {",
+      "\tentity: ${2:EntityName},",
+      "\toperations: {",
+      "\t\tget: {},",
+      "\t\tgetAll: {},",
+      "\t\tcreate: {},",
+      "\t\tupdate: {},",
+      "\t\tdelete: {},",
+      "\t},",
+      "}"
     ]
   }
 }
