@@ -61,7 +61,7 @@ repository:
       match: "\\b(true|false)"
     - comment: Enum values
       name: constant.language.enum.wasp
-      match: "\\b(EmailAndPassword|PostgreSQL|SQLite|Simple|PgBoss|SMTP|SendGrid|Mailgun)"
+      match: "\\b(EmailAndPassword|PostgreSQL|SQLite|Simple|PgBoss|SMTP|SendGrid|Mailgun|Dummy)"
     - comment: HTTP method enum values
       name: constant.language.httpMethod.enum.wasp
       match: "\\b(ALL|GET|POST|PUT|DELETE)"
