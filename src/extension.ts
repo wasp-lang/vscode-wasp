@@ -41,6 +41,15 @@ export async function activate(context: ExtensionContext): Promise<void> {
   const waspVersion = waspExecResult;
   outputChannel.appendLine("Confirmed that wasp executable is accessible, version " + waspVersion);
 
+  const minSupportedWaspVersion = "0.12.0"
+  if (compareSimpleSemvers(waspVersion, minSupportedWaspVersion) === -1) {
+    window.showErrorMessage(
+      `Version of your installed wasp executable is ${waspVersion}, but this VSCode extension supports only`
+      + ` wasp >= ${minSupportedWaspVersion}. Either update wasp or downgrade this extension.`
+    );
+    return;
+  }
+
   // TODO: send these settings to wasp language server so it can update its logging output if
   // these are changed while the language server is running
   const useOutputPanel = config.server.useOutputPanelForLogging;
