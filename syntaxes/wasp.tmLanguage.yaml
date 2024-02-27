@@ -80,30 +80,30 @@ repository:
     name: meta.jsImport.wasp
     patterns:
       - comment:
-          import { getList } from "@server/queries.js"
+          import { getList } from "@src/queries.js"
           ^^^^^^
         match: "import"
         name: keyword.control.import.wasp
       - comment: |-
-          import { getList } from "@server/queries.js"
+          import { getList } from "@src/queries.js"
                              ^^^^
         match: "from"
         name: keyword.control.from.wasp
       - comment: |-
-          import { getList } from "@server/queries.js"
-                                  ^^^^^^^^^^^^^^^^^^^^
+          import { getList } from "@src/queries.js"
+                                  ^^^^^^^^^^^^^^^^^
         begin: "\""
         end: "\""
         name: string.quoted.double.wasp
         patterns:
           - include: "#stringcontent"
           - comment: |-
-              import { getList } from "@server/queries.js"
-                                       ^^^^^^^
-            match: "@server|@client"
+              import { getList } from "@src/queries.js"
+                                       ^^^^
+            match: "@src|@server|@client"
             name: support.constant.shortpath.wasp
       - comment: |-
-          import { getList } from "@server/queries.js"
+          import { getList } from "@src/queries.js"
                  ^^^^^^^^^^^
         begin: "{"
         beginCaptures:
@@ -115,7 +115,7 @@ repository:
             name: punctuation.definition.modules.end.wasp
         contentName: variable.other.jsImport.module.wasp
       - comment: |-
-          import MainPage from "@client/MainPage.js"
+          import MainPage from "@src/MainPage.js"
                  ^^^^^^^^
         match: "\\b[a-zA-Z_][a-zA-Z_0-9]*\\b"
         name: variable.other.jsImport.module.wasp
