@@ -302,12 +302,6 @@ function getSnippets(waspVersion: string): Snippet[] {
     },
 
     {
-      prefix: "entity",
-      description: "[snippet] Create a new entity",
-      body: ["entity ${1:Name} {=psl", "\t${2:schema}", "psl=}"],
-    },
-
-    {
       prefix: "job",
       description: "[snippet] Create a new job",
       body: [
@@ -361,6 +355,15 @@ function getSnippets(waspVersion: string): Snippet[] {
       ],
     },
   ];
+
+  // We removed `entity` declaration in 0.14.0
+  if (major == 0 && minor <= 13) {
+    snippets.push({
+      prefix: "entity",
+      description: "[snippet] Create a new entity",
+      body: ["entity ${1:Name} {=psl", "\t${2:schema}", "psl=}"],
+    });
+  }
 
   return snippets;
 }
