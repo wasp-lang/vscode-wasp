@@ -59,6 +59,16 @@ export async function activate(context: ExtensionContext): Promise<void> {
     return;
   }
 
+  // The Wasp DSL is removed in Wasp 0.24 onwards, so we disable related
+  // functionality (snippets and language server) from that version on.
+  const firstWaspVersionWithoutLanguageServer = "0.24.0";
+  if (compareSimpleSemvers(waspVersion, firstWaspVersionWithoutLanguageServer) !== -1) {
+    outputChannel.appendLine(
+      `Wasp version is ${waspVersion} (>= ${firstWaspVersionWithoutLanguageServer}), which no longer uses the Wasp DSL. Skipping snippets and Wasp LSP Server.`,
+    );
+    return;
+  }
+
   // Register snippets for .wasp files.
   const snippets = getSnippets(waspVersion);
   const provider = languages.registerCompletionItemProvider("wasp", {
