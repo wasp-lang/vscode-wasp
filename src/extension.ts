@@ -1,12 +1,15 @@
+import { execFile } from "child_process";
 import * as os from "os";
+import { promisify } from "util";
 import {
-  languages,
-  workspace,
-  ExtensionContext,
-  window,
   commands,
   CompletionItem,
+  ExtensionContext,
+  languages,
   SnippetString,
+  TextEditor,
+  window,
+  workspace,
 } from "vscode";
 import {
   LanguageClient,
@@ -14,8 +17,6 @@ import {
   ServerOptions,
   TransportKind,
 } from "vscode-languageclient/node";
-import { promisify } from "util";
-import { execFile } from "child_process";
 
 let client: LanguageClient | null = null;
 
@@ -66,7 +67,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     outputChannel.appendLine(
       `Wasp version is ${waspVersion} (>= ${firstWaspVersionWithoutLanguageServer}), which no longer uses the Wasp DSL. Skipping snippets and Wasp LSP Server.`,
     );
-    warnAboutWaspDslRemovalWhenWaspFileOpen(context, waspVersion);
+    setupWarningWhenOpeningWaspDSLFile(context, waspVersion);
     return;
   }
 
@@ -161,28 +162,30 @@ export function deactivate(): void {
   }
 }
 
-// Shows a one-time notification when a `.wasp` file is open (or gets opened)
-// while the installed Wasp version no longer uses the Wasp DSL (0.24+).
-function warnAboutWaspDslRemovalWhenWaspFileOpen(
-  context: ExtensionContext,
-  waspVersion: string,
-): void {
+function setupWarningWhenOpeningWaspDSLFile(context: ExtensionContext, waspVersion: string): void {
   let warned = false;
 
-  const warnIfWaspFile = (document: { languageId: string }): void => {
-    if (warned || document.languageId !== "wasp") return;
-    warned = true;
-    window.showWarningMessage(
-      `This project uses Wasp ${waspVersion}, which no longer uses the Wasp DSL (\`.wasp\` files).` +
-        ` Wasp config now lives in TypeScript. This extension's \`.wasp\` features are disabled.`,
-    );
+  const warnIfWaspFileVisible = async (editors: readonly TextEditor[]): Promise<void> => {
+    if (!warned && editors.some((editor) => editor.document.languageId === "wasp")) {
+      warned = true;
+
+      const OPTIONS = ["Learn more", "OK"] as const;
+
+      const choice = await window.showWarningMessage(
+        `This project uses Wasp ${waspVersion}, which no longer supports the Wasp DSL (\`.wasp\` files).` +
+          ` Wasp config now lives in TypeScript. This extension's \`.wasp\` features are disabled.`,
+        {},
+        ...OPTIONS,
+      );
+
+      if (choice === "Learn more") {
+        await commands.executeCommand("vscode.open", "https://wasp.sh/docs/guides/legacy/wasp-dsl");
+      }
+    }
   };
 
-  for (const document of workspace.textDocuments) {
-    warnIfWaspFile(document);
-  }
-
-  context.subscriptions.push(workspace.onDidOpenTextDocument(warnIfWaspFile));
+  warnIfWaspFileVisible(window.visibleTextEditors);
+  context.subscriptions.push(window.onDidChangeVisibleTextEditors(warnIfWaspFileVisible));
 }
 
 // For a given user defined wasp executable path with possibly vs-code specific path variables,
