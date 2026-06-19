@@ -66,6 +66,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
     outputChannel.appendLine(
       `Wasp version is ${waspVersion} (>= ${firstWaspVersionWithoutLanguageServer}), which no longer uses the Wasp DSL. Skipping snippets and Wasp LSP Server.`,
     );
+    warnAboutWaspDslRemovalWhenWaspFileOpen(context, waspVersion);
     return;
   }
 
@@ -158,6 +159,30 @@ export function deactivate(): void {
   if (client) {
     client.stop();
   }
+}
+
+// Shows a one-time notification when a `.wasp` file is open (or gets opened)
+// while the installed Wasp version no longer uses the Wasp DSL (0.24+).
+function warnAboutWaspDslRemovalWhenWaspFileOpen(
+  context: ExtensionContext,
+  waspVersion: string,
+): void {
+  let warned = false;
+
+  const warnIfWaspFile = (document: { languageId: string }): void => {
+    if (warned || document.languageId !== "wasp") return;
+    warned = true;
+    window.showWarningMessage(
+      `This project uses Wasp ${waspVersion}, which no longer uses the Wasp DSL (\`.wasp\` files).` +
+        ` Wasp config now lives in TypeScript. This extension's \`.wasp\` features are disabled.`,
+    );
+  };
+
+  for (const document of workspace.textDocuments) {
+    warnIfWaspFile(document);
+  }
+
+  context.subscriptions.push(workspace.onDidOpenTextDocument(warnIfWaspFile));
 }
 
 // For a given user defined wasp executable path with possibly vs-code specific path variables,
