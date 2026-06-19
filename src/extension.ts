@@ -172,9 +172,10 @@ function setupWarningWhenOpeningWaspDSLFile(context: ExtensionContext, waspVersi
       const OPTIONS = ["Learn more", "OK"] as const;
 
       const choice = await window.showWarningMessage(
-        `This project uses Wasp ${waspVersion}, which no longer supports the Wasp DSL (\`.wasp\` files).` +
-          ` Wasp config now lives in TypeScript. This extension's \`.wasp\` features are disabled.`,
-        {},
+        [
+          `This project uses Wasp ${waspVersion}, which no longer supports the Wasp DSL (".wasp" files).`,
+          `Wasp DSL features are disabled.`,
+        ].join(" "),
         ...OPTIONS,
       );
 
